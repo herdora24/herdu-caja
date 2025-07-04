@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Caja y Gastos - HERDU</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div id="app">
+
+        <!-- =============================================================== -->
+        <!-- VISTA DE LOGIN -->
+        <!-- =============================================================== -->
+        <section id="login-view" class="view active-view">
+            <div class="login-container">
+                <header class="app-header">
+                    <img src="logo.png" alt="Logo HERDU" class="login-logo main-logo" onerror="this.style.display='none'">
+                    <h1>Control de Caja HERDU</h1>
+                    <p>Inicie sesión para comenzar la jornada.</p>
+                </header>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="caja-select"><i class="fas fa-inbox"></i> Seleccionar Caja:</label>
+                        <select id="caja-select" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="password-input"><i class="fas fa-lock"></i> Contraseña:</label>
+                        <input type="password" id="password-input" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Ingresar</button>
+                </form>
+                <div class="admin-login-link">
+                    <a href="#" id="show-admin-login">Acceso de Administrador</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- VISTA DE CAJA (OPERADOR) -->
+        <!-- =============================================================== -->
+        <section id="caja-view" class="view">
+            <header class="app-header-main">
+                <div class="logo-motivacional-container">
+                    <img src="logo.png" alt="Logo HERDU" class="header-logo main-logo" onerror="this.style.display='none'">
+                    <div class="motivational-message">
+                        🌟 ¡Recuerda que somos los mejores! Tu dedicación hace la diferencia cada día. 🌟
+                    </div>
+                </div>
+                <div>
+                    <h2 id="caja-view-title"></h2>
+                    <p id="caja-view-date"></p>
+                </div>
+                <button id="logout-btn" class="btn btn-danger">Cerrar Sesión</button>
+            </header>
+            <main class="caja-grid">
+                <!-- Columna de registros y listas -->
+                <div class="caja-actions">
+                    
+                    <div class="action-block">
+                        <form id="add-transferencia-form" class="action-form form-edicion">
+                            <div class="form-title-container">
+                                <h4><i class="fas fa-exchange-alt"></i> Registrar Transferencia y Domicilio</h4>
+                                <button type="button" id="manage-metodos-btn" class="btn btn-sm">Gestionar Métodos</button>
+                            </div>
+                            <select id="transferencia-metodo" class="metodo-pago-select" required></select>
+                            <input type="number" id="transferencia-monto" placeholder="Monto Transferencia" min="0" step="0.01" required>
+                            <input type="number" id="transferencia-domicilio" placeholder="Monto Domicilio (si aplica)" min="0" step="0.01">
+                            <button type="submit" class="btn">Agregar</button>
+                        </form>
+                        <div id="transferencias-list" class="movimientos-sublist"></div>
+                    </div>
+
+                    <div class="action-block">
+                        <form id="add-gasto-form" class="action-form form-edicion">
+                            <h4><i class="fas fa-shopping-cart"></i> Registrar Gasto (Efectivo)</h4>
+                            <input type="text" id="gasto-desc" placeholder="Descripción del gasto" required>
+                            <input type="number" id="gasto-monto" placeholder="Monto" min="0" step="0.01" required>
+                            <button type="submit" class="btn">Agregar</button>
+                        </form>
+                        <div id="gastos-list" class="movimientos-sublist"></div>
+                    </div>
+                    
+                    <div class="action-block">
+                        <form id="add-avance-recogida-form" class="action-form form-edicion">
+                            <h4><i class="fas fa-hand-holding-usd"></i> Registrar Avance / Recogida (Efectivo)</h4>
+                            <input type="text" id="avance-recogida-desc" placeholder="Ej: Avance turno, Recogida gerente" required>
+                            <input type="number" id="avance-recogida-monto" placeholder="Monto" min="0" step="0.01" required>
+                            <button type="submit" class="btn">Agregar</button>
+                        </form>
+                         <div id="avances-recogidas-list" class="movimientos-sublist"></div>
+                    </div>
+                </div>
+
+                <!-- Columna de resumen y cierre -->
+                <div class="caja-summary">
+                    <h3><i class="fas fa-clipboard-list"></i> Resumen del Día</h3>
+                    <div id="resumen-diario"></div>
+                    <hr>
+                    <div class="cierre-caja">
+                        <h3><i class="fas fa-calculator"></i> Cuadre de Caja</h3>
+                        <form id="generar-reporte-form">
+                            <div class="form-group">
+                                <label for="ventas-efectivo-contable"><strong>Total Ventas en Efectivo (Software):</strong></label>
+                                <input type="number" id="ventas-efectivo-contable" min="0" step="0.01" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Generar Reporte</button>
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </section>
+
+        <!-- =============================================================== -->
+        <!-- VISTA DE ADMINISTRADOR -->
+        <!-- =============================================================== -->
+        <section id="admin-view" class="view">
+             <header class="app-header-main">
+                <img src="logo.png" alt="Logo HERDU" class="header-logo main-logo" onerror="this.style.display='none'">
+                <div class="admin-motivational-message">
+                    🌟 Vanessa, tu liderazgo y dedicación hacen brillar a todo el equipo. ¡Gracias por inspirarnos cada día! 🌟
+                </div>
+                <div>
+                    <h2><i class="fas fa-cogs"></i> Panel de Administración</h2>
+                </div>
+                <button id="admin-logout-btn" class="btn btn-danger">Cerrar Sesión</button>
+            </header>
+            <main class="admin-main">
+                <nav class="admin-nav">
+                    <button class="nav-btn active" data-target="admin-reportes"><i class="fas fa-search-dollar"></i> Reportes Diarios</button>
+                    <button class="nav-btn" data-target="admin-cajas"><i class="fas fa-cash-register"></i> Gestionar Cajas</button>
+                    <button class="nav-btn" data-target="admin-usuarios"><i class="fas fa-users-cog"></i> Gestionar Admins</button>
+                    <button class="nav-btn" data-target="admin-mantenimiento"><i class="fas fa-trash-alt"></i> Mantenimiento</button>
+                </nav>
+                <div class="admin-content">
+                    <div id="admin-reportes" class="admin-tab active">
+                        <h3>Buscar Reporte Detallado por Día</h3>
+                        <div class="filtro-container">
+                            <input type="date" id="filtro-fecha-detallado">
+                            <select id="filtro-caja-detallado"></select>
+                            <button id="buscar-reporte-detallado-btn" class="btn">Buscar</button>
+                        </div>
+                        <div id="reporte-detallado-container">
+                             <!-- El reporte detallado se mostrará aquí -->
+                        </div>
+                    </div>
+                    <div id="admin-cajas" class="admin-tab">
+                        <h3>Gestionar Cajas</h3>
+                        <form id="form-caja" class="management-form">
+                            <input type="hidden" id="caja-id">
+                            <input type="text" id="caja-nombre" placeholder="Nombre de la Caja" required>
+                            <input type="password" id="caja-password" placeholder="Contraseña" required>
+                            <input type="number" id="caja-base" placeholder="Base de Caja Ej: 150000" min="0" step="0.01" required>
+                            <button type="submit" class="btn btn-primary">Guardar Caja</button>
+                        </form>
+                        <div id="cajas-list-container"></div>
+                    </div>
+                    <div id="admin-usuarios" class="admin-tab">
+                         <h3>Gestionar Administradores</h3>
+                        <form id="form-admin" class="management-form">
+                            <input type="hidden" id="admin-id">
+                            <input type="text" id="admin-username-input" placeholder="Nombre de usuario" required>
+                            <input type="password" id="admin-password-input" placeholder="Contraseña" required>
+                            <button type="submit" class="btn btn-primary">Guardar Administrador</button>
+                        </form>
+                        <div id="admins-list-container"></div>
+                    </div>
+                    <div id="admin-mantenimiento" class="admin-tab">
+                        <h3>Mantenimiento de Datos</h3>
+                        <div class="maintenance-block">
+                            <p>Esta acción borrará permanentemente todos los reportes del mes seleccionado. Úselo con precaución.</p>
+                            <input type="month" id="mes-a-borrar">
+                            <button id="borrar-historial-mes-btn" class="btn btn-danger">Borrar Reportes del Mes</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </section>
+    </div>
+
+    <!-- =============================================================== -->
+    <!-- MODALES -->
+    <!-- =============================================================== -->
+    <div id="admin-login-modal" class="modal">
+        <div class="modal-content"><span class="close-button">&times;</span><h2><i class="fas fa-user-shield"></i> Acceso de Administrador</h2><form id="admin-login-form"><div class="form-group"><label for="admin-username">Usuario:</label><input type="text" id="admin-username" required></div><div class="form-group"><label for="admin-password">Contraseña:</label><input type="password" id="admin-password" required></div><button type="submit" class="btn btn-primary">Ingresar</button></form></div>
+    </div>
+    
+    <div id="reporte-cuadre-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2><i class="fas fa-flag-checkered"></i> Reporte de Cuadre de Caja</h2>
+            <div id="reporte-cuadre-container" class="printable-report"></div>
+            <div class="modal-actions">
+                <button id="imprimir-reporte-btn" class="btn">Imprimir</button>
+                <button id="cerrar-caja-definitivo-btn" class="btn btn-primary">Guardar y Cerrar Caja</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="anulacion-modal" class="modal">
+        <div class="modal-content"><span class="close-button">&times;</span><h2><i class="fas fa-exclamation-triangle"></i> Anular Movimiento</h2><p>Debe ingresar una justificación para anular este movimiento.</p><form id="anulacion-form"><input type="hidden" id="anulacion-id"><textarea id="anulacion-justificacion" rows="4" placeholder="Escriba aquí la razón..." required></textarea><button type="submit" class="btn btn-danger">Confirmar Anulación</button></form></div>
+    </div>
+    
+    <div id="metodos-pago-modal" class="modal">
+        <div class="modal-content"><span class="close-button">&times;</span><h2><i class="fas fa-credit-card"></i> Gestionar Métodos de Pago</h2><form id="form-metodo-pago" class="management-form"><input type="text" id="metodo-pago-nombre" placeholder="Nombre del nuevo método" required><button type="submit" class="btn btn-primary">Agregar</button></form><hr><h4>Métodos Existentes</h4><div id="metodos-pago-list-container"></div></div>
+    </div>
+
+    <!-- =============================================================== -->
+    <!-- SCRIPTS -->
+    <!-- =============================================================== -->
+    <script src="js/storage.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
