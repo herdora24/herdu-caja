@@ -1,76 +1,95 @@
-// /js/storage.js
-
-/**
- * Módulo para interactuar con el LocalStorage y SessionStorage del navegador.
- * Abstrae las operaciones de lectura y escritura para el resto de la aplicación,
- * asegurando consistencia y manejo de errores básicos.
- */
-const Storage = {
-    /**
-     * Obtiene un item de una fuente de almacenamiento y lo parsea como JSON.
-     * @param {string} key - La clave del item a obtener.
-     * @param {'local' | 'session'} from - El almacenamiento a usar ('local' por defecto).
-     * @param {any} defaultValue - El valor a retornar si no se encuentra nada.
-     * @returns {any} El valor parseado o el valor por defecto si no existe o hay error.
-     */
-    get: (key, from = 'local', defaultValue = []) => {
-        const storage = from === 'local' ? localStorage : sessionStorage;
-        try {
-            const data = storage.getItem(key);
-            return data ? JSON.parse(data) : defaultValue;
-        } catch (error) {
-            console.error(`Error al leer '${key}' de ${from}Storage:`, error);
-            return defaultValue;
-        }
-    },
-
-    /**
-     * Guarda un item en el almacenamiento, convirtiéndolo a string JSON.
-     * @param {string} key - La clave bajo la cual se guardará el item.
-     * @param {any} value - El valor a guardar.
-     * @param {'local' | 'session'} to - El almacenamiento a usar ('local' por defecto).
-     */
-    set: (key, value, to = 'local') => {
-        const storage = to === 'local' ? localStorage : sessionStorage;
-        try {
-            storage.setItem(key, JSON.stringify(value));
-        } catch (error)
-        {
-            console.error(`Error al guardar '${key}' en ${to}Storage:`, error);
-        }
-    },
-    
-    // --- Métodos Específicos para Datos Persistentes (LocalStorage) ---
-
-    getAdmins: () => Storage.get('admins'),
-    saveAdmins: (admins) => Storage.set('admins', admins),
-
-    getCajas: () => Storage.get('cajas'),
-    saveCajas: (cajas) => Storage.set('cajas', cajas),
-
-    getReportes: () => Storage.get('reportes'),
-    saveReportes: (reportes) => Storage.set('reportes', reportes),
-    
-    getMetodosPago: () => Storage.get('metodosPago'),
-    saveMetodosPago: (metodos) => Storage.set('metodosPago', metodos),
-
-    // --- Métodos Específicos para Datos de Sesión (SessionStorage) ---
-
-    /**
-     * Obtiene el estado actual de la caja.
-     * AHORA CONTIENE BASE Y UN ÚNICO ARRAY DE MOVIMIENTOS.
-     * @returns {{base: number, movimientos: Array<object>}} El estado actual de la caja.
-     */
-    getCurrentCajaState: () => {
-        return Storage.get('currentCajaState', 'session', null);
-    },
-
-    saveCurrentCajaState: (state) => Storage.set('currentCajaState', state, 'session'),
-    clearCurrentCajaState: () => sessionStorage.removeItem('currentCajaState'),
-
-    getCurrentUser: () => {
-        return Storage.get('currentUser', 'session', null);
-    },
-    setCurrentUser: (user) => Storage.set('currentUser', user, 'session'),
-    clearCurrentUser: () => sessionStorage.removeItem('currentUser')
+// Inicialización de Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyAsEFBd8_MdsTh9o-3gJTFdZFFrN08Cbug",
+  authDomain: "herdu-caja.firebaseapp.com",
+  databaseURL: "https://herdu-caja-default-rtdb.firebaseio.com",
+  projectId: "herdu-caja",
+  storageBucket: "herdu-caja.firebasestorage.app",
+  messagingSenderId: "500478463392",
+  appId: "1:500478463392:web:00bd4a11e6880c42fbe8c5"
 };
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+const Storage = {
+  // Guarda un nuevo movimiento en Firebase
+  async saveMovimiento(movimiento) {
+    const newKey = database.ref().child('movimientos').push().key;
+    movimiento.id = newKey;
+    await database.ref('movimientos/' + newKey).set(movimiento);
+    return movimiento;
+  },
+
+  // Obtiene todos los movimientos desde Firebase
+  async getMovimientos() {
+    const snapshot = await database.ref('movimientos').once('value');
+    const data = snapshot.val();
+    return data ? Object.values(data) : [];
+  },
+
+  // Guarda una nueva caja en Firebase
+  async saveCaja(caja) {
+    const newKey = caja.id || database.ref().child('cajas').push().key;
+    caja.id = newKey;
+    await database.ref('cajas/' + newKey).set(caja);
+    return caja;
+  },
+
+  // Obtiene todas las cajas desde Firebase
+  async getCajas() {
+    const snapshot = await database.ref('cajas').once('value');
+    const data = snapshot.val();
+    return data ? Object.values(data) : [];
+  },
+
+  // Guarda un nuevo admin en Firebase
+  async saveAdmin(admin) {
+    const newKey = admin.id || database.ref().child('admins').push().key;
+    admin.id = newKey;
+    await database.ref('admins/' + newKey).set(admin);
+    return admin;
+  },
+
+  // Obtiene todos los admins desde Firebase
+  async getAdmins() {
+    const snapshot = await database.ref('admins').once('value');
+    const data = snapshot.val();
+    return data ? Object.values(data) : [];
+  },
+
+  // Guarda un nuevo método de pago en Firebase
+  async saveMetodoPago(metodo) {
+    const newKey = metodo.id || database.ref().child('metodosPago').push().key;
+    metodo.id = newKey;
+    await database.ref('metodosPago/' + newKey).set(metodo);
+    return metodo;
+  },
+
+  // Obtiene todos los métodos de pago desde Firebase
+  async getMetodosPago() {
+    const snapshot = await database.ref('metodosPago').once('value');
+    const data = snapshot.val();
+    return data ? Object.values(data) : [];
+  },
+
+  // Guarda el usuario actual en sesión (puedes adaptar según tu lógica)
+  setCurrentUser(user) {
+    sessionStorage.setItem('currentUser', JSON.stringify(user));
+  },
+
+  // Obtiene el usuario actual en sesión
+  getCurrentUser() {
+    const user = sessionStorage.getItem('currentUser');
+    return user ? JSON.parse(user) : null;
+  },
+
+  // Limpia el usuario actual en sesión
+  clearCurrentUser() {
+    sessionStorage.removeItem('currentUser');
+  },
+
+  // Aquí puedes agregar más métodos adaptados a Firebase según necesites
+};
+
+export default Storage;
